@@ -1,23 +1,15 @@
-version: '3.8'
-
 services:
   backend:
     build:
-      context: ./backend       # backend papkasi
-      dockerfile: Dockerfile   # Dockerfile nomi
-    container_name: renessans-backend
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    restart: always
 
   frontend:
     build:
-      context: ./frontend      # frontend papkasi
-      dockerfile: Dockerfile   # Dockerfile nomi
-    container_name: renessans-frontend
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "8080:80"
-    restart: always
 
