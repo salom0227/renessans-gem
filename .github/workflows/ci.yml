@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker build
+        run: docker compose build
+
+      - name: Run containers
+        run: docker compose up -d
+
+      - name: Healthcheck backend
+        run: |
+          sleep 8
+          curl -f http://localhost:3000/api/health
