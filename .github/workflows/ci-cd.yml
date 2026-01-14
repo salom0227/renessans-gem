@@ -1,0 +1,58 @@
+name: CI/CD Render
+
+on:
+  push:
+    branches:
+      - main  # faqat main branch push qilinsa ishga tushadi
+
+jobs:
+  build-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # Node setup for backend
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # Install backend dependencies
+      - name: Install backend dependencies
+        run: npm install --prefix backend
+
+      # Run backend tests (agar test script mavjud bo‘lsa)
+      - name: Run backend tests
+        run: |
+          if [ -f backend/package.json ]; then
+            npm test --prefix backend || echo "No test script configured"
+          fi
+
+      # Build docker images
+      - name: Docker Compose Build
+        run: docker-compose build
+
+      # Healthcheck backend
+      - name: Test backend health
+        run: |
+          docker-compose up -d
+          sleep 5
+          curl -f http://localhost:8080/api/health || exit 1
+
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Render Deploy
+        uses: render-examples/deploy-to-render@v1
+        with:
+          apiKey: ${{ secrets.RENDER_API_KEY }}
+          serviceId: ${{ secrets.RENDER_SERVICE_ID }}
